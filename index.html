@@ -1,226 +1,120 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>البطل الأمين – رحلة الضرب</title>
-
-<style>
-body{
-  font-family:"Tajawal",Arial;
-  margin:0;
-  background:#e8f5e9;
-  color:#1b5e20;
-}
-.container{max-width:540px;margin:auto;padding:14px}
-.card{
-  background:#fff;
-  border-radius:18px;
-  padding:16px;
-  margin-top:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-.character{
-  display:flex;gap:10px;align-items:center;
-}
-.avatar{font-size:40px}
-.name{font-weight:bold}
-.speech{
-  background:#e0f2f1;
-  padding:14px;
-  border-radius:14px;
-  line-height:1.8;
-}
-.visual{text-align:center;font-size:26px;margin:10px 0}
-input{
-  width:100%;
-  font-size:22px;
-  text-align:center;
-  padding:6px;
-}
-button{
-  padding:8px 18px;
-  font-size:17px;
-  border-radius:14px;
-  border:none;
-  background:#43a047;
-  color:white;
-  margin-top:8px;
-}
-.fullscreen{
-  background:#1b5e20;
-  width:100%;
-}
-.hidden{display:none}
-.helper{
-  background:#fff8e1;
-  padding:12px;
-  border-radius:12px;
-  margin-top:8px;
-  display:none;
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-
-<button class="fullscreen" onclick="toggleFullscreen()">🖥️ ملء الشاشة</button>
-
-<!-- المقدمة -->
-<div id="intro" class="card">
-  <div class="character">
-    <div class="avatar">🧔🏻‍♂️</div>
-    <div class="name">الحكيم إبراهيم</div>
-  </div>
-  <div class="speech">
-    يا بطل 🌿  
-    في وادي التعاون هناك من يحتاجك.  
-    <b>التعلّم عبادة، والنبي ﷺ يحب القوي الأمين.</b>
-  </div>
-
-  <p>اسم البطل:</p>
-  <input id="studentName">
-
-  <p>اسم ولي الأمر:</p>
-  <input id="parentName">
-
-  <button onclick="startStory()">ابدأ القصة</button>
-</div>
-
-<!-- القصة -->
-<div id="story" class="card hidden">
-
-  <div class="character" id="characterBox"></div>
-  <div id="storyText" class="speech"></div>
-
-  <div id="visual" class="visual"></div>
-
-  <input id="answer" type="text" inputmode="numeric" placeholder="كم الناتج؟">
-
-  <button onclick="solve()">أساعد 🤍</button>
-  <button onclick="helpMe()">أنا محتار</button>
-
-  <div id="helper" class="helper"></div>
-
-</div>
-
-</div>
-
 <script>
-let student,parent;
-let step=0;
-let a=0,b=0;
+/* ========= بيانات القصص ========= */
+const stories = [
+  {
+    character:"👨‍🌾",
+    name:"الراعي الصادق",
+    text:(a,b)=>`لدى الراعي ${eastern(a)} حظائر. في كل حظيرة ${eastern(b)} خراف.`,
+    visual:(a,b)=>{
+      let v="";
+      for(let i=0;i<a;i++) v+="🐑 ".repeat(b)+"<br>";
+      return v;
+    }
+  },
+  {
+    character:"🐝",
+    name:"النحلة المجتهدة",
+    text:(a,b)=>`هناك ${eastern(a)} خلايا. في كل خلية ${eastern(b)} أقراص عسل.`,
+    visual:(a,b)=>{
+      let v="";
+      for(let i=0;i<a;i++) v+="🍯 ".repeat(b)+"<br>";
+      return v;
+    }
+  },
+  {
+    character:"🧑‍🌾",
+    name:"البستاني الأمين",
+    text:(a,b)=>`زرع البستاني ${eastern(a)} صفوف. في كل صف ${eastern(b)} أشجار.`,
+    visual:(a,b)=>{
+      let v="";
+      for(let i=0;i<a;i++) v+="🌳 ".repeat(b)+"<br>";
+      return v;
+    }
+  },
+  {
+    character:"🎣",
+    name:"الصياد الهادئ",
+    text:(a,b)=>`اصطاد الصياد ${eastern(a)} شباك. في كل شبكة ${eastern(b)} أسماك.`,
+    visual:(a,b)=>{
+      let v="";
+      for(let i=0;i<a;i++) v+="🐟 ".repeat(b)+"<br>";
+      return v;
+    }
+  }
+];
 
-const intro=document.getElementById("intro");
-const story=document.getElementById("story");
-const storyText=document.getElementById("storyText");
-const visual=document.getElementById("visual");
-const answer=document.getElementById("answer");
-const helper=document.getElementById("helper");
-const characterBox=document.getElementById("characterBox");
-const studentName=document.getElementById("studentName");
-const parentName=document.getElementById("parentName");
+/* ========= التشجيع ========= */
+const encouragements=[
+  "محاولتك عبادة جميلة 🌷",
+  "الله يرى جهدك ويباركه",
+  "أحسنت، الصبر مفتاح الخير",
+  "كل محاولة ترفعك درجة",
+  "النبي ﷺ يحب القوي الأمين"
+];
 
-function eastern(n){
-  return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
-}
+let currentStory=0;
 
-function setCharacter(avatar,name){
-  characterBox.innerHTML=
-    `<div class="avatar">${avatar}</div>
-     <div class="name">${name}</div>`;
-}
-
-function startStory(){
-  student=studentName.value||"بطلنا";
-  parent=parentName.value||"ولي أمره";
-  intro.classList.add("hidden");
-  story.classList.remove("hidden");
-  step=0;
-  showStep();
-}
-
+/* ========= تعديل showStep ========= */
 function showStep(){
   answer.value="";
   helper.style.display="none";
   visual.innerHTML="";
-
   answer.style.display = (step===1) ? "block" : "none";
 
   if(step===0){
     setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
-    storyText.innerHTML=
-      `يا ${student} 🌿  
-      الراعي يحتاج مساعدتك في عدّ أغنامه.  
-      هل أنت مستعد؟`;
+    storyText.innerText=
+    `يا ${student}.
+اليوم سنحل مسائل جديدة مع قصص جميلة.
+تذكّر: الله مع الصابرين.`;
+    if(soundOn) speakText();
   }
 
   if(step===1){
-    setCharacter("👨‍🏫","المعلّم محمد");
-    a=3; b=2;
-    storyText.innerHTML=
-      `لدى الراعي ${eastern(a)} حظائر.  
-       في كل حظيرة ${eastern(b)} خراف 🐑.  
-       كم خروفًا لديه؟`;
-
-    for(let i=0;i<a;i++){
-      visual.innerHTML += "🐑 ".repeat(b) + "<br>";
-    }
+    const s=stories[currentStory];
+    a=Math.floor(Math.random()*3)+2; // ٢–٤
+    b=Math.floor(Math.random()*3)+1; // ١–٣
+    setCharacter(s.character,s.name);
+    storyText.innerText=
+      `${s.text(a,b)}
+كم المجموع؟`;
+    visual.innerHTML=s.visual(a,b);
+    if(soundOn) speakText();
   }
 
   if(step===2){
     setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
-    storyText.innerHTML=
-      `بارك الله فيك يا ${student} 🌟  
-       كنت أمينًا وساعدت الراعي.  
-       <b>كل محاولة عبادة جميلة.</b>`;
-    visual.innerHTML="🌿 🐑 🌱";
+    const msg=encouragements[Math.floor(Math.random()*encouragements.length)];
+    storyText.innerText=
+      `أحسنت يا ${student}.
+${msg}`;
+    visual.innerHTML="🌟 🤍 🌱";
+    if(soundOn) speakText();
   }
 }
 
+/* ========= تعديل solve ========= */
 function solve(){
-  if(step===0){
-    step=1;
-    showStep();
-    return;
-  }
+  if(step===0){ step=1; showStep(); return; }
 
   if(step===1){
     if(Number(answer.value)===a*b){
       step=2;
+      currentStory=(currentStory+1)%stories.length;
       showStep();
     }else{
-      storyText.innerHTML=
-        `لا بأس يا ${student}.  
-         لنعدّ بهدوء، والله مع الصابرين.`;
+      storyText.innerText=
+      `لا بأس يا ${student}.
+الخطأ طريق التعلّم.
+لنعدّ بهدوء، والله مع الصابرين.`;
+      if(soundOn) speakText();
     }
     return;
   }
 
-  /* ✅ الإصلاح التقني: استمرار الأسئلة */
   if(step===2){
     step=1;
     showStep();
   }
 }
-
-function helpMe(){
-  helper.style.display="block";
-  helper.innerHTML=
-    `تذكّر 🌱  
-     لدينا ${eastern(a)} مجموعات،  
-     في كل مجموعة ${eastern(b)} عناصر.  
-     الضرب = جمع متكرر.`;
-}
-
-function toggleFullscreen(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen();
-  }else{
-    document.exitFullscreen();
-  }
-}
 </script>
-
-</body>
-</html>
