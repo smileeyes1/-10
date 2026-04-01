@@ -46,6 +46,10 @@ button{
   color:white;
   margin-top:8px;
 }
+.fullscreen{
+  background:#1b5e20;
+  width:100%;
+}
 .hidden{display:none}
 .helper{
   background:#fff8e1;
@@ -60,6 +64,8 @@ button{
 <body>
 <div class="container">
 
+<button class="fullscreen" onclick="toggleFullscreen()">🖥️ ملء الشاشة</button>
+
 <!-- المقدمة -->
 <div id="intro" class="card">
   <div class="character">
@@ -67,29 +73,32 @@ button{
     <div class="name">الحكيم إبراهيم</div>
   </div>
   <div class="speech">
-    مرحبًا أيها البطل 🌱<br>
-    اليوم نحتاجك في مهمة خير.<br>
-    تذكّر: <b>النبي ﷺ يحب القوي الأمين</b>.
+    يا بطل 🌿  
+    في وادي التعاون هناك من يحتاجك.  
+    <b>التعلّم عبادة، والنبي ﷺ يحب القوي الأمين.</b>
   </div>
+
   <p>اسم البطل:</p>
   <input id="studentName">
+
   <p>اسم ولي الأمر:</p>
   <input id="parentName">
+
   <button onclick="startStory()">ابدأ القصة</button>
 </div>
 
 <!-- القصة -->
 <div id="story" class="card hidden">
 
-  <div id="characterBox" class="character"></div>
+  <div class="character" id="characterBox"></div>
   <div id="storyText" class="speech"></div>
 
   <div id="visual" class="visual"></div>
 
-  <input id="answer" type="number" placeholder="كم المجموع؟">
+  <input id="answer" type="number" placeholder="كم الناتج؟">
 
   <button onclick="solve()">أساعد 🤍</button>
-  <button onclick="help()">أنا محتار</button>
+  <button onclick="helpMe()">أنا محتار</button>
 
   <div id="helper" class="helper"></div>
 
@@ -100,18 +109,18 @@ button{
 <script>
 let student,parent;
 let step=0;
-let a,b;
+let a=0,b=0;
+
+const intro=document.getElementById("intro");
+const story=document.getElementById("story");
+const storyText=document.getElementById("storyText");
+const visual=document.getElementById("visual");
+const answer=document.getElementById("answer");
+const helper=document.getElementById("helper");
+const characterBox=document.getElementById("characterBox");
 
 function eastern(n){
   return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
-}
-
-function startStory(){
-  student=studentName.value||"بطلنا";
-  parent=parentName.value||"ولي أمره";
-  intro.classList.add("hidden");
-  story.classList.remove("hidden");
-  nextStep();
 }
 
 function setCharacter(avatar,name){
@@ -119,7 +128,16 @@ function setCharacter(avatar,name){
     `<div class="avatar">${avatar}</div><div class="name">${name}</div>`;
 }
 
-function nextStep(){
+function startStory(){
+  student=studentName.value||"بطلنا";
+  parent=parentName.value||"ولي أمره";
+  intro.classList.add("hidden");
+  story.classList.remove("hidden");
+  step=0;
+  showStep();
+}
+
+function showStep(){
   answer.value="";
   helper.style.display="none";
   visual.innerHTML="";
@@ -127,17 +145,17 @@ function nextStep(){
   if(step===0){
     setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
     storyText.innerHTML=
-      `يا ${student} 🌿<br>
-       في وادي التعاون، هناك صديق يحتاج مساعدتك.<br>
+      `يا ${student} 🌿  
+       الراعي يحتاج مساعدتك في عدّ أغنامه.  
        هل أنت مستعد؟`;
   }
 
   if(step===1){
-    a=3; b=2;
     setCharacter("👨‍🏫","المعلّم محمد");
+    a=3; b=2;
     storyText.innerHTML=
-      `لدى الراعي ${eastern(a)} حظائر.<br>
-       في كل حظيرة ${eastern(b)} خراف 🐑.<br>
+      `لدى الراعي ${eastern(a)} حظائر.  
+       في كل حظيرة ${eastern(b)} خراف 🐑.  
        كم خروفًا لديه؟`;
 
     for(let i=0;i<a;i++){
@@ -148,38 +166,50 @@ function nextStep(){
   if(step===2){
     setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
     storyText.innerHTML=
-      `أحسنت يا ${student} 🌟<br>
-       ساعدت الراعي، وكنت أمينًا.<br>
-       <b>الله يرى جهدك ويباركه.</b>`;
+      `بارك الله فيك يا ${student} 🌟  
+       كنت أمينًا وساعدت الراعي.  
+       <b>كل محاولة عبادة جميلة.</b>`;
     visual.innerHTML="🌿 🐑 🌱";
   }
-
-  step++;
 }
 
 function solve(){
-  if(step===2){ nextStep(); return; }
+  if(step===0){
+    step=1;
+    showStep();
+    return;
+  }
 
-  if(Number(answer.value)===a*b){
-    storyText.innerHTML=
-      `نجحت 🌟<br>
-       هذه ${eastern(a)} مجموعات، في كل مجموعة ${eastern(b)}.<br>
-       محاولتك عبادة جميلة.`;
-    setTimeout(nextStep,1200);
-  }else{
-    storyText.innerHTML=
-      `لا بأس يا ${student}.<br>
-       الخطأ طريق الفهم، والله مع الصابرين.`;
+  if(step===1){
+    if(Number(answer.value)===a*b){
+      step=2;
+      showStep();
+    }else{
+      storyText.innerHTML=
+        `لا بأس يا ${student}.  
+         لنعدّ بهدوء، والله مع الصابرين.`;
+    }
   }
 }
 
-function help(){
+function helpMe(){
   helper.style.display="block";
   helper.innerHTML=
-    `عدّ بهدوء 🌿<br>
-     ${eastern(a)} مجموعات × ${eastern(b)} عناصر.<br>
-     هو جمع متكرر.`;
+    `تذكّر 🌱  
+     لدينا ${eastern(a)} مجموعات،  
+     في كل مجموعة ${eastern(b)} عناصر.  
+     الضرب = جمع متكرر.`;
+}
+
+/* ملء الشاشة */
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen();
+  }else{
+    document.exitFullscreen();
+  }
 }
 </script>
+
 </body>
 </html>
