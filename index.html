@@ -95,7 +95,8 @@ button{
 
   <div id="visual" class="visual"></div>
 
-  <input id="answer" type="number" placeholder="كم الناتج؟">
+  <!-- تم التعديل التقني هنا -->
+  <input id="answer" type="text" inputmode="numeric" placeholder="كم الناتج؟">
 
   <button onclick="solve()">أساعد 🤍</button>
   <button onclick="helpMe()">أنا محتار</button>
@@ -119,18 +120,22 @@ const answer=document.getElementById("answer");
 const helper=document.getElementById("helper");
 const characterBox=document.getElementById("characterBox");
 
+/* تعريف تقني لعناصر الإدخال */
+const studentName = document.getElementById("studentName");
+const parentName  = document.getElementById("parentName");
+
 function eastern(n){
   return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 }
 
 function setCharacter(avatar,name){
-  characterBox.innerHTML=
+  characterBox.innerHTML =
     `<div class="avatar">${avatar}</div><div class="name">${name}</div>`;
 }
 
 function startStory(){
-  student=studentName.value||"بطلنا";
-  parent=parentName.value||"ولي أمره";
+  student = studentName.value || "بطلنا";
+  parent  = parentName.value  || "ولي أمره";
   intro.classList.add("hidden");
   story.classList.remove("hidden");
   step=0;
@@ -141,6 +146,9 @@ function showStep(){
   answer.value="";
   helper.style.display="none";
   visual.innerHTML="";
+
+  /* إظهار حقل الإجابة فقط عند السؤال */
+  answer.style.display = (step === 1) ? "block" : "none";
 
   if(step===0){
     setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
@@ -174,6 +182,7 @@ function showStep(){
 }
 
 function solve(){
+  // ملاحظة تقنية: زر "أساعد" هنا يعمل كبدء الرحلة
   if(step===0){
     step=1;
     showStep();
