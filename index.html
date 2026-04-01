@@ -2,77 +2,57 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>رحلة الضرب المباركة – التعلّم عبادة</title>
+<title>البطل الأمين – رحلة الضرب</title>
 
 <style>
-*{box-sizing:border-box}
 body{
-  margin:0;
   font-family:"Tajawal",Arial;
-  background:linear-gradient(#e8f5e9,#ffffff);
+  margin:0;
+  background:#e8f5e9;
   color:#1b5e20;
 }
-.container{
-  max-width:520px;
-  margin:auto;
-  padding:14px;
-}
+.container{max-width:540px;margin:auto;padding:14px}
 .card{
   background:#fff;
   border-radius:18px;
   padding:16px;
   margin-top:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
+.character{
+  display:flex;gap:10px;align-items:center;
+}
+.avatar{font-size:40px}
+.name{font-weight:bold}
 .speech{
   background:#e0f2f1;
   padding:14px;
   border-radius:14px;
-  line-height:1.7;
+  line-height:1.8;
 }
+.visual{text-align:center;font-size:26px;margin:10px 0}
 input{
   width:100%;
   font-size:22px;
   text-align:center;
   padding:6px;
-  border-radius:10px;
-  border:2px solid #a5d6a7;
 }
 button{
   padding:8px 18px;
   font-size:17px;
-  border:none;
   border-radius:14px;
+  border:none;
   background:#43a047;
   color:white;
-  cursor:pointer;
   margin-top:8px;
 }
-button:disabled{
-  background:#a5d6a7;
-  cursor:not-allowed;
-}
-.visual{
-  text-align:center;
-  font-size:26px;
-  margin:10px 0;
-}
-.group{
-  margin:4px;
-}
+.hidden{display:none}
 .helper{
   background:#fff8e1;
   padding:12px;
   border-radius:12px;
-  margin-top:10px;
+  margin-top:8px;
   display:none;
-}
-.hidden{display:none}
-.timer{
-  text-align:center;
-  font-size:15px;
-  margin-top:6px;
-  color:#33691e;
 }
 </style>
 </head>
@@ -82,165 +62,124 @@ button:disabled{
 
 <!-- المقدمة -->
 <div id="intro" class="card">
-  <div class="speech">
-    بسم الله نبدأ 🌿<br>
-    الضرب ليس صعبًا، هو جمع ذكي مرتب.<br>
-    <b>التعلّم عبادة، والله مع الصابرين.</b>
+  <div class="character">
+    <div class="avatar">🧔🏻‍♂️</div>
+    <div class="name">الحكيم إبراهيم</div>
   </div>
-
-  <p>اسم الطالب:</p>
+  <div class="speech">
+    مرحبًا أيها البطل 🌱<br>
+    اليوم نحتاجك في مهمة خير.<br>
+    تذكّر: <b>النبي ﷺ يحب القوي الأمين</b>.
+  </div>
+  <p>اسم البطل:</p>
   <input id="studentName">
-
   <p>اسم ولي الأمر:</p>
   <input id="parentName">
-
-  <button onclick="startLesson()">ابدأ الرحلة</button>
+  <button onclick="startStory()">ابدأ القصة</button>
 </div>
 
-<!-- الدرس -->
-<div id="lesson" class="card hidden">
+<!-- القصة -->
+<div id="story" class="card hidden">
 
-  <div id="teacherText" class="speech"></div>
+  <div id="characterBox" class="character"></div>
+  <div id="storyText" class="speech"></div>
 
-  <div id="question" style="font-size:28px;text-align:center;margin:12px 0"></div>
+  <div id="visual" class="visual"></div>
 
-  <div id="visualArea" class="visual"></div>
+  <input id="answer" type="number" placeholder="كم المجموع؟">
 
-  <input id="answer" type="number" placeholder="الناتج">
-
-  <button onclick="checkAnswer()">تحقّق</button>
-  <button onclick="needHelp()">أنا محتار 🤍</button>
+  <button onclick="solve()">أساعد 🤍</button>
+  <button onclick="help()">أنا محتار</button>
 
   <div id="helper" class="helper"></div>
 
-  <div id="nextArea" class="hidden">
-    <div class="timer" id="timerText"></div>
-    <button id="nextBtn" disabled onclick="nextStep()">التالي</button>
-  </div>
-
-  <button onclick="showReport()">📄 تقرير لولي الأمر</button>
 </div>
 
 </div>
 
 <script>
-let student="", parent="";
-let a=0, b=0;
-let attempts=0, helps=0;
+let student,parent;
 let step=0;
-let wait=10, timer;
+let a,b;
 
 function eastern(n){
   return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 }
 
-function startLesson(){
-  student = studentName.value || "بطلنا";
-  parent  = parentName.value || "ولي أمره";
-
+function startStory(){
+  student=studentName.value||"بطلنا";
+  parent=parentName.value||"ولي أمره";
   intro.classList.add("hidden");
-  lesson.classList.remove("hidden");
-  newQuestion();
+  story.classList.remove("hidden");
+  nextStep();
 }
 
-function newQuestion(){
-  attempts=0; helps=0; step=0;
-
-  a = Math.ceil(Math.random()*10);
-  b = Math.ceil(Math.random()*10);
-
-  teacherText.innerHTML =
-    `يا ${student} 🌱<br>
-     قبل أن نجيب، سنفهم بهدوء.<br>
-     الضرب يعني مجموعات متساوية.`;
-
-  question.innerText =
-    `${eastern(a)} × ${eastern(b)} = ؟`;
-
-  drawGroups();
-
-  answer.value="";
-  helper.style.display="none";
-  nextArea.classList.add("hidden");
-}
-
-function drawGroups(){
-  visualArea.innerHTML="";
-  for(let i=0;i<a;i++){
-    const g=document.createElement("div");
-    g.className="group";
-    g.textContent="🍎 ".repeat(b);
-    visualArea.appendChild(g);
-  }
-}
-
-function checkAnswer(){
-  attempts++;
-  if(Number(answer.value) === a*b){
-    teacherText.innerHTML =
-      `أحسنت يا ${student} 🌟<br>
-       فهمك للضرب رائع.<br>
-       <b>محاولتك عبادة جميلة.</b>`;
-    startNextTimer();
-  }else{
-    teacherText.innerHTML =
-      `لا بأس يا ${student}.<br>
-       لنعدّ التفاحات معًا بهدوء.<br>
-       الله مع الصابرين.`;
-  }
-}
-
-function needHelp(){
-  helps++;
-  helper.style.display="block";
-  helper.innerHTML =
-    `تنفّس بعمق 🌿<br>
-     عدد المجموعات = ${eastern(a)}<br>
-     في كل مجموعة ${eastern(b)} عناصر.<br>
-     هو جمع متكرر.`;
-}
-
-function startNextTimer(){
-  nextArea.classList.remove("hidden");
-  wait=10;
-  nextBtn.disabled=true;
-  timerText.innerText=`الانتقال بعد ${eastern(wait)} ثوانٍ`;
-
-  timer=setInterval(()=>{
-    wait--;
-    timerText.innerText=`الانتقال بعد ${eastern(wait)} ثوانٍ`;
-    if(wait===0){
-      clearInterval(timer);
-      timerText.innerText="يمكنك المتابعة 🌿";
-      nextBtn.disabled=false;
-    }
-  },1000);
+function setCharacter(avatar,name){
+  characterBox.innerHTML=
+    `<div class="avatar">${avatar}</div><div class="name">${name}</div>`;
 }
 
 function nextStep(){
+  answer.value="";
+  helper.style.display="none";
+  visual.innerHTML="";
+
+  if(step===0){
+    setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
+    storyText.innerHTML=
+      `يا ${student} 🌿<br>
+       في وادي التعاون، هناك صديق يحتاج مساعدتك.<br>
+       هل أنت مستعد؟`;
+  }
+
+  if(step===1){
+    a=3; b=2;
+    setCharacter("👨‍🏫","المعلّم محمد");
+    storyText.innerHTML=
+      `لدى الراعي ${eastern(a)} حظائر.<br>
+       في كل حظيرة ${eastern(b)} خراف 🐑.<br>
+       كم خروفًا لديه؟`;
+
+    for(let i=0;i<a;i++){
+      visual.innerHTML += "🐑 ".repeat(b) + "<br>";
+    }
+  }
+
+  if(step===2){
+    setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
+    storyText.innerHTML=
+      `أحسنت يا ${student} 🌟<br>
+       ساعدت الراعي، وكنت أمينًا.<br>
+       <b>الله يرى جهدك ويباركه.</b>`;
+    visual.innerHTML="🌿 🐑 🌱";
+  }
+
   step++;
-  const sequence = [
-    "شرح إضافي: الضرب جمع ذكي متكرر.",
-    "تلميح: اجمع نفس العدد أكثر من مرة.",
-    "نشاط عملي: اكتب العملية في دفترك ✍️",
-    "مثال: لديك مجموعتان في كل واحدة ٣ ألعاب.",
-    "سؤال: هل تشعر بالثقة الآن؟",
-    "بارك الله فيك، أنت قوي أمين 🌿"
-  ];
-  alert(sequence[step-1] || "ننتقل لسؤال جديد");
-  if(step>=6) newQuestion();
 }
 
-function showReport(){
-  alert(
-    `تقرير تربوي لولي الأمر 🌱\n\n` +
-    `الطالب: ${student}\n` +
-    `عدد المحاولات: ${attempts}\n` +
-    `عدد طلبات المساعدة: ${helps}\n\n` +
-    `نوصي بالتشجيع، فكل محاولة عبادة.`
-  );
+function solve(){
+  if(step===2){ nextStep(); return; }
+
+  if(Number(answer.value)===a*b){
+    storyText.innerHTML=
+      `نجحت 🌟<br>
+       هذه ${eastern(a)} مجموعات، في كل مجموعة ${eastern(b)}.<br>
+       محاولتك عبادة جميلة.`;
+    setTimeout(nextStep,1200);
+  }else{
+    storyText.innerHTML=
+      `لا بأس يا ${student}.<br>
+       الخطأ طريق الفهم، والله مع الصابرين.`;
+  }
+}
+
+function help(){
+  helper.style.display="block";
+  helper.innerHTML=
+    `عدّ بهدوء 🌿<br>
+     ${eastern(a)} مجموعات × ${eastern(b)} عناصر.<br>
+     هو جمع متكرر.`;
 }
 </script>
-
 </body>
 </html>
