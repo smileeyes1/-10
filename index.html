@@ -95,7 +95,6 @@ button{
 
   <div id="visual" class="visual"></div>
 
-  <!-- تم التعديل التقني هنا -->
   <input id="answer" type="text" inputmode="numeric" placeholder="كم الناتج؟">
 
   <button onclick="solve()">أساعد 🤍</button>
@@ -119,23 +118,22 @@ const visual=document.getElementById("visual");
 const answer=document.getElementById("answer");
 const helper=document.getElementById("helper");
 const characterBox=document.getElementById("characterBox");
-
-/* تعريف تقني لعناصر الإدخال */
-const studentName = document.getElementById("studentName");
-const parentName  = document.getElementById("parentName");
+const studentName=document.getElementById("studentName");
+const parentName=document.getElementById("parentName");
 
 function eastern(n){
   return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 }
 
 function setCharacter(avatar,name){
-  characterBox.innerHTML =
-    `<div class="avatar">${avatar}</div><div class="name">${name}</div>`;
+  characterBox.innerHTML=
+    `<div class="avatar">${avatar}</div>
+     <div class="name">${name}</div>`;
 }
 
 function startStory(){
-  student = studentName.value || "بطلنا";
-  parent  = parentName.value  || "ولي أمره";
+  student=studentName.value||"بطلنا";
+  parent=parentName.value||"ولي أمره";
   intro.classList.add("hidden");
   story.classList.remove("hidden");
   step=0;
@@ -147,15 +145,14 @@ function showStep(){
   helper.style.display="none";
   visual.innerHTML="";
 
-  /* إظهار حقل الإجابة فقط عند السؤال */
-  answer.style.display = (step === 1) ? "block" : "none";
+  answer.style.display = (step===1) ? "block" : "none";
 
   if(step===0){
     setCharacter("🧔🏻‍♂️","الحكيم إبراهيم");
     storyText.innerHTML=
       `يا ${student} 🌿  
-       الراعي يحتاج مساعدتك في عدّ أغنامه.  
-       هل أنت مستعد؟`;
+      الراعي يحتاج مساعدتك في عدّ أغنامه.  
+      هل أنت مستعد؟`;
   }
 
   if(step===1){
@@ -182,7 +179,6 @@ function showStep(){
 }
 
 function solve(){
-  // ملاحظة تقنية: زر "أساعد" هنا يعمل كبدء الرحلة
   if(step===0){
     step=1;
     showStep();
@@ -198,6 +194,13 @@ function solve(){
         `لا بأس يا ${student}.  
          لنعدّ بهدوء، والله مع الصابرين.`;
     }
+    return;
+  }
+
+  /* ✅ الإصلاح التقني: استمرار الأسئلة */
+  if(step===2){
+    step=1;
+    showStep();
   }
 }
 
@@ -210,7 +213,6 @@ function helpMe(){
      الضرب = جمع متكرر.`;
 }
 
-/* ملء الشاشة */
 function toggleFullscreen(){
   if(!document.fullscreenElement){
     document.documentElement.requestFullscreen();
